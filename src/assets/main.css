@@ -1,0 +1,55 @@
+:root {
+  --background-gris: #D9D9D9 /*Gris background
+
+  /* Azul Principal */
+  --azul-principal: #046cae; /* Azul fuerte */
+  --azul-principal-60: rgba(4, 108, 174, 0.6); /* Azul fuerte 60% */
+  --azul-principal-40: rgba(4, 108, 174, 0.4); /* Azul fuerte 40% */
+
+  /* Gris Oscuro */
+  --gris-oscuro: #445267; /* Gris oscuro */
+  --gris-oscuro-60: rgba(68, 82, 103, 0.6); /* Gris oscuro 60% */
+  --gris-oscuro-40: rgba(68, 82, 103, 0.4); /* Gris oscuro 40% */
+
+  /* Turquesa */
+  --turquesa: #0faec0; /* Turquesa */
+  --turquesa-60: rgba(15, 174, 192, 0.6); /* Turquesa 60% */
+  --turquesa-40: rgba(15, 174, 192, 0.4); /* Turquesa 40% */
+
+  /* Azul Violeta */
+  --azul-violeta: #565fa7; /* Azul violeta */
+  --azul-violeta-60: rgba(86, 95, 167, 0.6); /* Azul violeta 60% */
+  --azul-violeta-40: rgba(86, 95, 167, 0.4); /* Azul violeta 40% */
+
+  /* Amarillo */
+  --amarillo: #fab736; /* Amarillo */
+  --amarillo-60: rgba(250, 183, 54, 0.6); /* Amarillo 60% */
+  --amarillo-40: rgba(250, 183, 54, 0.4); /* Amarillo 40% */
+
+  /* Rojo Vino */
+  --rojo-vino: #b72f63; /* Rojo vino */
+  --rojo-vino-60: rgba(183, 47, 99, 0.6); /* Rojo vino 60% */
+  --rojo-vino-40: rgba(183, 47, 99, 0.4); /* Rojo vino 40% */
+
+  /* Azul Claro */
+  --azul-claro: #a1c2f3; /* Azul claro */
+  --azul-claro-60: rgba(161, 194, 243, 0.6); /* Azul claro 60% */
+  --azul-claro-40: rgba(161, 194, 243, 0.4); /* Azul claro 40% */
+
+  /* Azul Oscuro */
+  --azul-oscuro: #083351; /* Azul oscuro */
+  --azul-oscuro-60: rgba(8, 51, 81, 0.6); /* Azul oscuro 60% */
+  --azul-oscuro-40: rgba(8, 51, 81, 0.4); /* Azul oscuro 40% */
+}
+
+*{
+  font-family: "Montserrat", sans-serif;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+body{
+  background-color:  #D9D9D9;
+}
+
