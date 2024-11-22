@@ -5,7 +5,14 @@
   import { mdiCalendarEdit } from "@mdi/js"
   import { ref, computed, onMounted } from 'vue';
 
+
   const listaCalendarios = ref([])
+  const calendarioSeleccionado = ref({});
+
+    const abrirModal = (calendario) => {
+      calendarioSeleccionado.value = calendario;
+    };
+
   
     const getCalendarios = async () => {
     try {
@@ -24,10 +31,6 @@
     getCalendarios();
     });
 
-    const abrirModal = () => {
-        alert("EDITAR ACCION")
-    }
-
 
     const headers = [
         { key: 'USUARIOS', label: 'Usuario' },
@@ -40,6 +43,7 @@
         { key: 'ESTADO', label: 'Estado'},
         { key: 'Acciones', label: 'Acciones'}
     ];
+
 
   // CONFIGURACION BUSQUEDA
 
@@ -60,90 +64,82 @@
 
 
   const getStatusClass = (status) => {
-    console.log(status)
-
+    
     const classes = {
       S: 'badge bg-success bg-sucess-opacity',
       N: 'badge bg-danger bg-danger-opacity',
     };
     return classes[status] || 'badge bg-secondary';
   };
+
+
+
 </script>
 
 <template>
 
     <div class="container-tabla">
-        <div class="p-2">
-            <h3 class="fw-bold">Listado De Calendario</h3>
-            <h5 class="text-secondary">Instrumento N° 1153 - Autoevaluacion Academica</h5>
-        </div>
+            <div class="p-2">
+                <h3 class="fw-bold">Listado De Calendario</h3>
+                <h5 class="text-secondary">Instrumento N° 1153 - Autoevaluacion Academica</h5>
+            </div>
     
         <!-- Tabla de datos -->
-        <div class="table-responsive">
-            <table class="table table-hover align-middle text-center fs-6 mb-1 mt-2">
-            <thead>
-                <tr>
-                <th v-for="header in headers" :key="header.key" class="text-center header">
-                    {{ header.label }}
-                </th>
-                </tr>
-            </thead>
-            <tbody >
-                <tr v-for="item in listaCalendarios" :key="item.id">
-                    <td class="py-3">{{ item.USUARIOS }}</td>
-                    <td class="py-3">{{ item.ID_CALENDARIO }}</td>
-                    <td class="py-3 fw-semibold">{{ item.ID_INST }}</td>
-                    <td class="py-3">{{ item.FECHA_INI }}</td>
-                    <td class="py-3">{{ item.FECHA_FIN }}</td>
-                    <td class="py-3">{{ item.NRO_OPORTUNIDADES }}</td>
-                    <td class="py-3">{{ item.ANONIMA }}</td>
-                    <td class="py-3">
-                        <span class="p-2" :class="getStatusClass(item.ESTADO)">
-                            <div v-if="item.ESTADO === 'N'">
-                                No Vigente
-                            </div>
-                            <div v-else-if="item.ESTADO === 'S'">
-                                Vigente
-                            </div>
-                            
-                        </span>
-                    </td>
-                    <td class="py-3">
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                        Launch demo modal
-                        </button>
-                    </td>
-                </tr>
-            </tbody>
-            </table>
-        </div>
-        </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle text-center fs-6 mb-1 mt-2">
+                <thead>
+                    <tr>
+                    <th v-for="header in headers" :key="header.key" class="text-center header">
+                        {{ header.label }}
+                    </th>
+                    </tr>
+                </thead>
+                <tbody >
+                    <tr v-for="item in listaCalendarios" :key="item.id">
+                        <td class="py-3">{{ item.USUARIOS }}</td>
+                        <td class="py-3">{{ item.ID_CALENDARIO }}</td>
+                        <td class="py-3 fw-semibold">{{ item.ID_INST }}</td>
+                        <td class="py-3">{{ item.FECHA_INI }}</td>
+                        <td class="py-3">{{ item.FECHA_FIN }}</td>
+                        <td class="py-3">{{ item.NRO_OPORTUNIDADES }}</td>
+                        <td class="py-3">{{ item.ANONIMA }}</td>
+                        <td class="py-3">
+                            <span class="p-2" :class="getStatusClass(item.ESTADO)">
+                                <div v-if="item.ESTADO === 'N'">
+                                    No Vigente
+                                </div>
+                                <div v-else-if="item.ESTADO === 'S'">
+                                    Vigente
+                                </div>
+                            </span>
+                        </td>
+                        <td class="py-3">
 
-
-        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
+                             <!-- Botón que abre el modal -->
+                            <button
+                            type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#exampleModal"
+                            @click="abrirModal(item)"
+                            >
+                                Ver Detalles
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+                </table>
             </div>
         </div>
 
-</div>
-
-
-  
-
+               
+            <!-- Componente Modal -->
+            <Modal v-if="calendarioSeleccionado" :calendario="calendarioSeleccionado" />
+        
+        
+      
 </template>
-  
+
 
 <style scoped>
 
@@ -155,6 +151,17 @@
         border-radius: 5px;
     }
 
+    @media (width < 990px){
+        .container-tabla{
+            margin-top: 25vh;
+        }
+    }
+    
+    @media (width < 768px){
+        .container-tabla{
+            margin-top: 55vh;
+        }
+    }
        
         .edit-button{
             transition: all 300ms;
