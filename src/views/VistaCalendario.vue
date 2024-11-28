@@ -90,7 +90,7 @@ import Tabla from "@/components/Tabla.vue";
     left: 50%;
     transform: translate(-50%, 10vh);
     z-index: 0;
-    top: 10px;
+    top: 25px;
     transition: all 500ms ease;
   }
 

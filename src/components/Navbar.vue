@@ -5,10 +5,10 @@
   <div class="fondo">
     
       <aside>
-        <img class="mt-3" src="../assets/img/unap_aniversario2 (3).png" alt="">
+        <img class="mt-3" src="../assets/img/unap_aniversario2 (3).png" alt="logo_unap" width="80%">
       </aside>
       <aside class="d-flex align-item-center justify-content-center gap-2 text-light">
-        <div class="mt-2">
+        <div class="mt-3">
           <h4 class="fs-6 fw-bold">Sandra Arevalos </h4>
           <h4 class="fs-6 ">25.235.287-2</h4>
         </div>
@@ -33,6 +33,14 @@
 .avatar:hover{
     scale: 105%;
 }
+
+@media (width < 770px){
+  .avatar{
+    display: none;
+  }
+}
+
+
 .logo {
   padding: 4rem;
 }

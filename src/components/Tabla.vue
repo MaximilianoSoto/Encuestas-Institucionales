@@ -1,26 +1,17 @@
 <script setup>
  import Modal from '@/components/Modales/EditarModal.vue'
-  import SvgIcon from '@jamescoyle/vue-icon'
-  import axios from 'axios';
-  import { mdiCalendarEdit } from "@mdi/js"
-  import { ref, computed, onMounted } from 'vue';
-
+ import axios from 'axios';
+ import { ref, computed, onMounted } from 'vue';
 
   const listaCalendarios = ref([])
   const calendarioSeleccionado = ref({});
 
-    const abrirModal = (calendario) => {
-      calendarioSeleccionado.value = calendario;
-    };
-
-  
-    const getCalendarios = async () => {
+  const getCalendarios = async () => {
     try {
-        const response = await axios.get("https://portalonlinedev.unap.cl/base_encuesta/getCalendarios/?instrumento=1064");
+        const response = await axios.get("https://portalonlinedev.unap.cl/base_encuesta/api/getCalendarios/?instrumento=1070");
        
         listaCalendarios.value = response.data.message.slice(0, 5);
         
-        console.log(listaCalendarios.value)
         
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -30,6 +21,11 @@
     onMounted(() => {
     getCalendarios();
     });
+
+
+    const abrirModal = (calendario) => {
+      calendarioSeleccionado.value = calendario;
+    };
 
 
     const headers = [
@@ -116,15 +112,16 @@
                         <td class="py-3">
 
                              <!-- Botón que abre el modal -->
-                            <button
-                            type="button"
-                            class="btn btn-primary"
-                            data-bs-toggle="modal"
-                            data-bs-target="#exampleModal"
-                            @click="abrirModal(item)"
-                            >
+                             <button
+                                type="button"
+                                class="btn btn-primary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#exampleModal"
+                                @click="abrirModal(item)"
+                                >
                                 Ver Detalles
                             </button>
+
                         </td>
                     </tr>
                 </tbody>
@@ -132,9 +129,8 @@
             </div>
         </div>
 
-               
-            <!-- Componente Modal -->
-            <Modal v-if="calendarioSeleccionado" :calendario="calendarioSeleccionado" />
+        <!-- Componente Modal -->
+        <Modal v-if="calendarioSeleccionado" :calendario="calendarioSeleccionado" />
         
         
       
@@ -145,7 +141,7 @@
 
     .container-tabla{
         background-color: white;
-        margin-top: 13vh;
+        margin-top: 15vh;
         width: 77%;
         padding:10px;
         border-radius: 5px;
@@ -159,7 +155,7 @@
     
     @media (width < 768px){
         .container-tabla{
-            margin-top: 55vh;
+            margin-top: 3vh;
         }
     }
        
@@ -240,6 +236,17 @@
         .page-link:focus{
             outline: none;
             box-shadow: none;
+        }
+
+        @media (max-width: 768px) {
+            .page-link,
+            .page-item:first-child .page-link,
+            .page-item:last-child .page-link {
+                width: 25px;
+                height: 25px;
+                font-size: 12px;
+                line-height: 23px; /* Ajustado para dispositivos móviles */
+            }
         }
 
         @media (max-width: 768px) {

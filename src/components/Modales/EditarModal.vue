@@ -1,31 +1,127 @@
 <script setup>
-  import { ref, defineProps } from "vue";
+import { ref, defineProps, watch } from "vue";
+import axios from "axios";
+import Swal from "sweetalert2";
 
-  const fechaInicio = ref('');
-  const fechaFin = ref('');
-  const error = ref('');
+// Props que recibe el calendario
+const props = defineProps({
+  calendario: {
+    type: Object,
+    required: false,
+    default: null, // Valor predeterminado si no se pasa nada
+  },
+});
 
-  const props = defineProps({
-    calendario: {
-      type: Object,
-      required: true,
-    },
-  });
+
+const fechaInicio = ref("");
+
+// DATOS DESDE LA TABLA
+const fechaFin = ref("");
+const fechaFinFormateada = ref("");
+const IDCalendario = ref("");
+const IDInstrumento = ref("");
+
+
+const error = ref("");
+
+
+// Función para formatear la fecha (solo para mostrarla)
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return ""; 
+  const [year, month, day] = fecha.split("-"); 
+  return `${day}/${month}/${year}`; 
+};
+
+
+/*
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return ""; 
+  const [year, month, day] = fecha.split("-"); 
+  const yearShort = year.slice(-2); 
+  return `${day}/${month}/${yearShort}`; 
+};
+*/
+
+const enviarFechaFin = async (fechaFin,IDCalendario,IDInstrumento) => {
+
+  console.log(fechaFin)
+
+  try {
+    const response = await axios.post('https://portalonlinedev.unap.cl/base_encuesta/api/extenderPeriodo', {
+    "nuevaFecha": fechaFin,
+    "idCalendario": 14605,
+    "idInstrumento": 1070
+
+    });
+   
+    Swal.fire({
+      icon: 'success',
+      title: 'Fecha enviada correctamente',
+      text: `La fecha de fin ${fechaFin} se ha enviado exitosamente.`,
+    });
+
+
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Hubo un problema al enviar la fecha. Intenta nuevamente.',
+    });
+  }
+};
+
+watch(
+  () => props.calendario,
+  (newVal) => {
+    if (newVal) {
+      fechaInicio.value = newVal.FECHA_INI || ""; // Maneja posibles valores vacíos
+      IDCalendario.value = newVal.ID_CALENDARIO;
+      IDInstrumento.value = newVal.ID_INST;
+    }
+  },
+  { immediate: true }
+);
+
+
+const validarFechas = () => {
+ 
+  if (!fechaFin.value) {
+    error.value = "Debe selecciona fecha fin.";
+    return;
+  }
+
+  const convertirAISO = (fecha) => {
+    const [day, month, year] = fecha.split("/"); // Dividir DD/MM/YY
+    return `${day}-${month}-${year}`; // Convertir a formato YYYY-MM-DD
+  };
+
+
+
+  const fechaInicioISO = convertirAISO(fechaInicio.value);
+
  
 
-  const validarFechas = () => {
-      if (!fechaInicio.value || !fechaFin.value) {
-        error.value = "Ambos campos son obligatorios.";
-        return;
-      }
+  // Crear objetos Date para comparación
+  const fechaInicioDate = new Date(fechaInicioISO);
+  const fechaFinDate = new Date(fechaFin.value);
 
-      if (new Date(fechaInicio.value) > new Date(fechaFin.value)) {
-        error.value = "La fecha de inicio no puede ser mayor que la fecha de fin.";
-      } else {
-        error.value = "";
-        alert("Fechas válidas.");
-      }
-   };
+
+  if (fechaFinDate < fechaInicioDate) {
+    error.value = "La fecha de fin debe ser posterior a la fecha de inicio.";
+  } else {
+    alert("ENTRO")
+
+    fechaFinFormateada.value = formatearFecha(fechaFin.value)
+
+    enviarFechaFin(fechaFinFormateada.value,IDCalendario,IDInstrumento)
+    error.value = "";
+    fechaFin
+  } 
+};
+
+
 
 
 </script>
@@ -41,9 +137,7 @@
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">
-            Detalles del Calendario
-          </h5>
+          <h5 class="modal-title" id="exampleModalLabel">Extender calendario</h5>
           <button
             type="button"
             class="btn-close"
@@ -51,43 +145,36 @@
             aria-label="Close"
           ></button>
         </div>
-        <div class="modal-body" v-if="props.calendario">
-
+        <div class="modal-body">   
           <form @submit.prevent="validarFechas">
-              <div class="mb-3">
-                <label for="fechaInicio" class="form-label">Fecha Inicio</label>
-                <input
-                  type="date"
-                  id="fechaInicio"
-                  v-model="fechaInicio"
-                  class="form-control"
-                  disabled
-                />
-              </div>
-              <div class="mb-3">
-                <label for="fechaFin" class="form-label">Fecha Fin</label>
-                <input
-                  type="date"
-                  id="fechaFin"
-                  v-model="fechaFin"
-                  class="form-control"
-                />
-              </div>
-              <div v-if="error" class="alert alert-danger" role="alert">
-                {{ error }}
-              </div>
-
-              <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Validar Fechas</button>
-                
-                <button
-                  type="button"
-                  class="btn btn-danger"
-                  data-bs-dismiss="modal"
-                >
-                  Cancelar
-                </button>
-              </div>
+            <div class="mb-3">
+              <label for="fechaInicio" class="form-label">Fecha Inicio</label>
+              <input
+                type="text"
+                id="fechaInicio"
+                :value="fechaInicio"
+                class="form-control"
+                disabled
+              />
+            </div>
+            <div class="mb-3">
+              <label for="fechaFin" class="form-label">Fecha Fin</label>
+              <input
+                type="date"
+                id="fechaFin"
+                v-model="fechaFin"
+                class="form-control"
+              />
+            </div>
+            <div v-if="error" class="alert alert-danger" role="alert">
+              {{ error }}
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Validar Fechas</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                Cancelar
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -98,6 +185,7 @@
 <style scoped>
 /* Estilos opcionales */
 </style>
+
 
 
 
