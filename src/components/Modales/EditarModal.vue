@@ -34,25 +34,15 @@ const formatearFecha = (fecha) => {
 };
 
 
-/*
-
-const formatearFecha = (fecha) => {
-  if (!fecha) return ""; 
-  const [year, month, day] = fecha.split("-"); 
-  const yearShort = year.slice(-2); 
-  return `${day}/${month}/${yearShort}`; 
-};
-*/
 
 const enviarFechaFin = async (fechaFin,IDCalendario,IDInstrumento) => {
 
-  console.log(fechaFin)
-
+  
   try {
     const response = await axios.post('https://portalonlinedev.unap.cl/base_encuesta/api/extenderPeriodo', {
     "nuevaFecha": fechaFin,
-    "idCalendario": 14605,
-    "idInstrumento": 1070
+    "idCalendario": IDCalendario.value,
+    "idInstrumento": IDInstrumento.value
 
     });
    

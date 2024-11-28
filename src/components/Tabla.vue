@@ -5,14 +5,37 @@
 
   const listaCalendarios = ref([])
   const calendarioSeleccionado = ref({});
+  const isDescending = ref(true); 
+  const showVigente = ref(true); 
+
+    // Función para alternar el filtro
+    const toggleVigencia = () => {
+    showVigente.value = !showVigente.value;
+    };
+
+
+
+  const toggleOrder = () => {
+        isDescending.value = !isDescending.value;
+        listaCalendarios.value.sort((a, b) => {
+            const dateA = new Date(a.FECHA_FIN);
+            const dateB = new Date(b.FECHA_FIN);
+            return isDescending.value ? dateB - dateA : dateA - dateB; // Alternar entre descendente y ascendente
+        });
+    };
 
   const getCalendarios = async () => {
     try {
         const response = await axios.get("https://portalonlinedev.unap.cl/base_encuesta/api/getCalendarios/?instrumento=1070");
        
-        listaCalendarios.value = response.data.message.slice(0, 5);
-        
-        
+        listaCalendarios.value = response.data.message.slice(0,15);
+
+        const filteredCalendarios = computed(() => {
+        return listaCalendarios.value.filter(item => 
+            showVigente.value ? item.ESTADO === 'S' : item.ESTADO === 'N'
+        );
+        });
+  
     } catch (error) {
         console.error("Error fetching data:", error);
     }
@@ -33,7 +56,7 @@
         { key: 'ID_CALENDARIO', label: 'Calendario' },
         { key: 'ID_INST', label: 'Instrumento' },
         { key: 'FECHA_INI', label: 'Fecha' },
-        { key: 'FECHA_FIN', label: 'Estado' },
+        { key: 'FECHA_FIN', label: 'Fecha Fin' },
         { key: 'NRO_OPORTUNIDADES', label: 'Oportunidades' },
         { key: 'ANONIMA', label: 'Anonima' },
         { key: 'ESTADO', label: 'Estado'},
@@ -67,9 +90,6 @@
     };
     return classes[status] || 'badge bg-secondary';
   };
-
-
-
 </script>
 
 <template>
@@ -78,6 +98,14 @@
             <div class="p-2">
                 <h3 class="fw-bold">Listado De Calendario</h3>
                 <h5 class="text-secondary">Instrumento N° 1153 - Autoevaluacion Academica</h5>
+
+                  <!-- Botón Toggle Orden -->
+                <button 
+                class="btn btn-outline-primary btn-sm" 
+                @click="toggleOrder"
+                >
+                Ordenar: {{ isDescending ? 'Recientes Primero' : 'Antiguos Primero' }}
+                </button>
             </div>
     
         <!-- Tabla de datos -->
@@ -120,6 +148,14 @@
                                 @click="abrirModal(item)"
                                 >
                                 Ver Detalles
+                            </button>
+
+                            <!-- Botón Toggle Vigencia -->
+                            <button 
+                            class="btn btn-outline-primary btn-sm" 
+                            @click="toggleVigencia"
+                            >
+                            Mostrar: {{ showVigente ? 'Vigentes' : 'No Vigentes' }}
                             </button>
 
                         </td>
@@ -237,6 +273,22 @@
             outline: none;
             box-shadow: none;
         }
+
+
+        .btn-outline-primary {
+            border: 1px solid #007bff;
+            color: #007bff;
+            background-color: transparent;
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: all 0.2s;
+            }
+
+            .btn-outline-primary:hover {
+            background-color: #007bff;
+            color: white;
+            }
 
         @media (max-width: 768px) {
             .page-link,
