@@ -1,177 +1,153 @@
 <script setup>
- import Modal from '@/components/Modales/EditarModal.vue'
- import axios from 'axios';
- import { ref, computed, onMounted } from 'vue';
+import Modal from '@/components/Modales/EditarModal.vue'
+import axios from 'axios';
+import { ref, onMounted } from 'vue';
 
-  const listaCalendarios = ref([])
-  const calendarioSeleccionado = ref({});
-  const isDescending = ref(true); 
-  const showVigente = ref(true); 
+const listaCalendarios = ref([]);
+const calendarioSeleccionado = ref({});
+const isDescending = ref(true);
+const mostrarEstado = ref("S");
+const filteredCalendarios = ref([]); 
 
-    // Función para alternar el filtro
-    const toggleVigencia = () => {
-    showVigente.value = !showVigente.value;
-    };
+const actualizarCalendarios = () => {
+  filteredCalendarios.value = listaCalendarios.value.filter(
+    (item) => item.ESTADO === mostrarEstado.value
+  );
+};
 
+// Función para alternar el estado
+const toggleEstado = () => {
+  mostrarEstado.value = mostrarEstado.value === "S" ? "N" : "S";
+  actualizarCalendarios(); 
+};
 
-
-  const toggleOrder = () => {
-        isDescending.value = !isDescending.value;
-        listaCalendarios.value.sort((a, b) => {
-            const dateA = new Date(a.FECHA_FIN);
-            const dateB = new Date(b.FECHA_FIN);
-            return isDescending.value ? dateB - dateA : dateA - dateB; // Alternar entre descendente y ascendente
-        });
-    };
-
-  const getCalendarios = async () => {
-    try {
-        const response = await axios.get("https://portalonlinedev.unap.cl/base_encuesta/api/getCalendarios/?instrumento=1070");
-       
-        listaCalendarios.value = response.data.message.slice(0,15);
-
-        const filteredCalendarios = computed(() => {
-        return listaCalendarios.value.filter(item => 
-            showVigente.value ? item.ESTADO === 'S' : item.ESTADO === 'N'
-        );
-        });
-  
-    } catch (error) {
-        console.error("Error fetching data:", error);
-    }
-    };
-
-    onMounted(() => {
-    getCalendarios();
-    });
-
-
-    const abrirModal = (calendario) => {
-      calendarioSeleccionado.value = calendario;
-    };
-
-
-    const headers = [
-        { key: 'USUARIOS', label: 'Usuario' },
-        { key: 'ID_CALENDARIO', label: 'Calendario' },
-        { key: 'ID_INST', label: 'Instrumento' },
-        { key: 'FECHA_INI', label: 'Fecha' },
-        { key: 'FECHA_FIN', label: 'Fecha Fin' },
-        { key: 'NRO_OPORTUNIDADES', label: 'Oportunidades' },
-        { key: 'ANONIMA', label: 'Anonima' },
-        { key: 'ESTADO', label: 'Estado'},
-        { key: 'Acciones', label: 'Acciones'}
-    ];
-
-
-  // CONFIGURACION BUSQUEDA
-
-  const searchQuery = ref('');
-
-  // Filtrar los datos según la búsqueda
-  const filteredData = computed(() => {
-    let result = data.value;
-    if (searchQuery.value) {
-      result = result.filter(item => 
-        Object.values(item).some(val => 
-          String(val).toLowerCase().includes(searchQuery.value.toLowerCase())
-        )
-      );
-    }
-    return result;
+// Función para alternar el orden de las fechas
+const toggleOrder = () => {
+  isDescending.value = !isDescending.value;
+  filteredCalendarios.value.sort((a, b) => {
+    const dateA = new Date(a.FECHA_FIN);
+    const dateB = new Date(b.FECHA_FIN);
+    return isDescending.value ? dateB - dateA : dateA - dateB;
   });
+};
 
+// Obtener los calendarios desde la API
+const getCalendarios = async () => {
+  try {
+    const response = await axios.get("https://portalonlinedev.unap.cl/base_encuesta/api/getCalendarios/?instrumento=1070");
+    listaCalendarios.value = response.data.message;
+    actualizarCalendarios()
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+};
 
-  const getStatusClass = (status) => {
-    
-    const classes = {
-      S: 'badge bg-success bg-sucess-opacity',
-      N: 'badge bg-danger bg-danger-opacity',
-    };
-    return classes[status] || 'badge bg-secondary';
+onMounted(() => {
+  getCalendarios();
+});
+
+const abrirModal = (calendario) => {
+  calendarioSeleccionado.value = calendario;
+};
+
+const headers = [
+  { key: 'USUARIOS', label: 'Usuario' },
+  { key: 'ID_CALENDARIO', label: 'Calendario' },
+  { key: 'ID_INST', label: 'Instrumento' },
+  { key: 'FECHA_INI', label: 'Fecha' },
+  { key: 'FECHA_FIN', label: 'Fecha Fin' },
+  { key: 'NRO_OPORTUNIDADES', label: 'Oportunidades' },
+  { key: 'ANONIMA', label: 'Anonima' },
+  { key: 'ESTADO', label: 'Estado' },
+  { key: 'Acciones', label: 'Acciones' }
+];
+
+const getStatusClass = (status) => {
+  const classes = {
+    S: 'badge bg-success bg-sucess-opacity',
+    N: 'badge bg-danger bg-danger-opacity',
   };
+  return classes[status] || 'badge bg-secondary';
+};
+
 </script>
 
 <template>
-
-    <div class="container-tabla">
-            <div class="p-2">
-                <h3 class="fw-bold">Listado De Calendario</h3>
-                <h5 class="text-secondary">Instrumento N° 1153 - Autoevaluacion Academica</h5>
-
-                  <!-- Botón Toggle Orden -->
-                <button 
-                class="btn btn-outline-primary btn-sm" 
-                @click="toggleOrder"
-                >
+  <div class="container-tabla">
+    <div class="p-2 d-flex justify-content-between">
+        <aside>
+            <h3 class="fw-bold">Listado De Calendario</h3>
+            <h5 class="text-secondary">Instrumento N° 1153 - Autoevaluacion Academica</h5>
+        </aside>
+        <aside class="d-flex flex-column gap-2">
+            <!-- Botón Toggle Orden -->
+            <button  class="btn btn-outline-primary btn-sm" @click="toggleOrder">
                 Ordenar: {{ isDescending ? 'Recientes Primero' : 'Antiguos Primero' }}
+            </button>
+
+            <div class="btn btn-group">
+                <button class="btn btn-sm btn-vigente" @click="toggleEstado">
+                     Vigente
+                </button>
+                <button class="btn btn-sm btn-no-vigente" @click="toggleEstado">
+                     No Vigente
                 </button>
             </div>
-    
-        <!-- Tabla de datos -->
-            <div class="table-responsive">
-                <table class="table table-hover align-middle text-center fs-6 mb-1 mt-2">
-                <thead>
-                    <tr>
-                    <th v-for="header in headers" :key="header.key" class="text-center header">
-                        {{ header.label }}
-                    </th>
-                    </tr>
-                </thead>
-                <tbody >
-                    <tr v-for="item in listaCalendarios" :key="item.id">
-                        <td class="py-3">{{ item.USUARIOS }}</td>
-                        <td class="py-3">{{ item.ID_CALENDARIO }}</td>
-                        <td class="py-3 fw-semibold">{{ item.ID_INST }}</td>
-                        <td class="py-3">{{ item.FECHA_INI }}</td>
-                        <td class="py-3">{{ item.FECHA_FIN }}</td>
-                        <td class="py-3">{{ item.NRO_OPORTUNIDADES }}</td>
-                        <td class="py-3">{{ item.ANONIMA }}</td>
-                        <td class="py-3">
-                            <span class="p-2" :class="getStatusClass(item.ESTADO)">
-                                <div v-if="item.ESTADO === 'N'">
-                                    No Vigente
-                                </div>
-                                <div v-else-if="item.ESTADO === 'S'">
-                                    Vigente
-                                </div>
-                            </span>
-                        </td>
-                        <td class="py-3">
 
-                             <!-- Botón que abre el modal -->
-                             <button
-                                type="button"
-                                class="btn btn-primary"
-                                data-bs-toggle="modal"
-                                data-bs-target="#exampleModal"
-                                @click="abrirModal(item)"
-                                >
-                                Ver Detalles
-                            </button>
+            <!-- Botón Toggle Estado -->
+            <button class="btn btn-outline-primary btn-sm" @click="toggleEstado">
+                Mostrar: {{ mostrarEstado === 'S' ? 'Vigentes' : 'No Vigentes' }}
+            </button>
+        </aside>      
+    </div>
 
-                            <!-- Botón Toggle Vigencia -->
-                            <button 
-                            class="btn btn-outline-primary btn-sm" 
-                            @click="toggleVigencia"
-                            >
-                            Mostrar: {{ showVigente ? 'Vigentes' : 'No Vigentes' }}
-                            </button>
+    <!-- Tabla de datos -->
+    <div class="table-responsive">
+      <table class="table table-hover align-middle text-center fs-6 mb-1 mt-2">
+        <thead>
+          <tr>
+            <th v-for="header in headers" :key="header.key" class="text-center header">
+              {{ header.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Usar filteredCalendarios en lugar de listaCalendarios -->
+          <tr v-for="item in filteredCalendarios" :key="item.ID_CALENDARIO">
+            <td class="py-3">{{ item.USUARIOS }}</td>
+            <td class="py-3">{{ item.ID_CALENDARIO }}</td>
+            <td class="py-3 fw-semibold">{{ item.ID_INST }}</td>
+            <td class="py-3">{{ item.FECHA_INI }}</td>
+            <td class="py-3">{{ item.FECHA_FIN }}</td>
+            <td class="py-3">{{ item.NRO_OPORTUNIDADES }}</td>
+            <td class="py-3">{{ item.ANONIMA }}</td>
+            <td class="py-3">
+              <span class="p-2" :class="getStatusClass(item.ESTADO)">
+                <div v-if="item.ESTADO === 'N'">No Vigente</div>
+                <div v-else-if="item.ESTADO === 'S'">Vigente</div>
+              </span>
+            </td>
+            <td class="py-3">
+              <!-- Botón que abre el modal -->
+              <button
+                type="button"
+                class="btn btn-primary"
+                data-bs-toggle="modal"
+                data-bs-target="#exampleModal"
+                @click="abrirModal(item)"
+              >
+                Ver Detalles
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-                        </td>
-                    </tr>
-                </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Componente Modal -->
-        <Modal v-if="calendarioSeleccionado" :calendario="calendarioSeleccionado" />
-        
-        
-      
+  <!-- Componente Modal -->
+  <Modal v-if="calendarioSeleccionado" :calendario="calendarioSeleccionado" />
 </template>
-
 
 <style scoped>
 
@@ -182,6 +158,17 @@
         padding:10px;
         border-radius: 5px;
     }
+
+    .btn-vigente{
+        background-color: #0FAEC0;
+    }
+
+    .btn-no-vigente{
+        background-color: #b72f63;
+    }
+
+
+
 
     @media (width < 990px){
         .container-tabla{
