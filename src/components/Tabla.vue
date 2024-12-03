@@ -1,12 +1,14 @@
 <script setup>
+import SvgIcon from '@jamescoyle/vue-icon';
 import Modal from '@/components/Modales/EditarModal.vue'
 import axios from 'axios';
+import { mdiArrowUpDown } from "@mdi/js";
 import { ref, onMounted } from 'vue';
 
 const listaCalendarios = ref([]);
 const calendarioSeleccionado = ref({});
 const isDescending = ref(true);
-const mostrarEstado = ref("S");
+const mostrarEstado = ref("N");
 const filteredCalendarios = ref([]); 
 
 const actualizarCalendarios = () => {
@@ -14,6 +16,7 @@ const actualizarCalendarios = () => {
     (item) => item.ESTADO === mostrarEstado.value
   );
 };
+
 
 // Función para alternar el estado
 const toggleEstado = () => {
@@ -23,12 +26,15 @@ const toggleEstado = () => {
 
 // Función para alternar el orden de las fechas
 const toggleOrder = () => {
-  isDescending.value = !isDescending.value;
-  filteredCalendarios.value.sort((a, b) => {
+   // Alternar el estado entre true y false
+   isDescending.value = !isDescending.value;
+
+    // Ordenar la lista según el estado actual
+    filteredCalendarios.value.sort((a, b) => {
     const dateA = new Date(a.FECHA_FIN);
     const dateB = new Date(b.FECHA_FIN);
     return isDescending.value ? dateB - dateA : dateA - dateB;
-  });
+    });
 };
 
 // Obtener los calendarios desde la API
@@ -50,18 +56,6 @@ const abrirModal = (calendario) => {
   calendarioSeleccionado.value = calendario;
 };
 
-const headers = [
-  { key: 'USUARIOS', label: 'Usuario' },
-  { key: 'ID_CALENDARIO', label: 'Calendario' },
-  { key: 'ID_INST', label: 'Instrumento' },
-  { key: 'FECHA_INI', label: 'Fecha' },
-  { key: 'FECHA_FIN', label: 'Fecha Fin' },
-  { key: 'NRO_OPORTUNIDADES', label: 'Oportunidades' },
-  { key: 'ANONIMA', label: 'Anonima' },
-  { key: 'ESTADO', label: 'Estado' },
-  { key: 'Acciones', label: 'Acciones' }
-];
-
 const getStatusClass = (status) => {
   const classes = {
     S: 'badge bg-success bg-sucess-opacity',
@@ -79,69 +73,91 @@ const getStatusClass = (status) => {
             <h3 class="fw-bold">Listado De Calendario</h3>
             <h5 class="text-secondary">Instrumento N° 1153 - Autoevaluacion Academica</h5>
         </aside>
-        <aside class="d-flex flex-column gap-2">
-            <!-- Botón Toggle Orden -->
-            <button  class="btn btn-outline-primary btn-sm" @click="toggleOrder">
-                Ordenar: {{ isDescending ? 'Recientes Primero' : 'Antiguos Primero' }}
-            </button>
-
-            <div class="btn btn-group">
-                <button class="btn btn-sm btn-vigente" @click="toggleEstado">
-                     Vigente
-                </button>
-                <button class="btn btn-sm btn-no-vigente" @click="toggleEstado">
-                     No Vigente
-                </button>
+        <aside class="d-flex flex-column gap-2 mt-3">
+            <div class="btn-group" role="group" aria-label="Botones">
+                <button type="button" class="btn btn-vigente" @click="toggleEstado('S')">Vigente</button>
+                <button type="button" class="btn btn-no-vigente"  @click="toggleEstado('N')">No Vigente</button>
             </div>
-
-            <!-- Botón Toggle Estado -->
-            <button class="btn btn-outline-primary btn-sm" @click="toggleEstado">
-                Mostrar: {{ mostrarEstado === 'S' ? 'Vigentes' : 'No Vigentes' }}
-            </button>
         </aside>      
     </div>
 
+
     <!-- Tabla de datos -->
     <div class="table-responsive">
-      <table class="table table-hover align-middle text-center fs-6 mb-1 mt-2">
-        <thead>
-          <tr>
-            <th v-for="header in headers" :key="header.key" class="text-center header">
-              {{ header.label }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Usar filteredCalendarios en lugar de listaCalendarios -->
-          <tr v-for="item in filteredCalendarios" :key="item.ID_CALENDARIO">
-            <td class="py-3">{{ item.USUARIOS }}</td>
-            <td class="py-3">{{ item.ID_CALENDARIO }}</td>
-            <td class="py-3 fw-semibold">{{ item.ID_INST }}</td>
-            <td class="py-3">{{ item.FECHA_INI }}</td>
-            <td class="py-3">{{ item.FECHA_FIN }}</td>
-            <td class="py-3">{{ item.NRO_OPORTUNIDADES }}</td>
-            <td class="py-3">{{ item.ANONIMA }}</td>
-            <td class="py-3">
-              <span class="p-2" :class="getStatusClass(item.ESTADO)">
-                <div v-if="item.ESTADO === 'N'">No Vigente</div>
-                <div v-else-if="item.ESTADO === 'S'">Vigente</div>
-              </span>
-            </td>
-            <td class="py-3">
-              <!-- Botón que abre el modal -->
-              <button
-                type="button"
-                class="btn btn-primary"
-                data-bs-toggle="modal"
-                data-bs-target="#exampleModal"
-                @click="abrirModal(item)"
-              >
-                Ver Detalles
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+        <table class="table table-hover align-middle text-center fs-6 mb-1 mt-2">
+            <thead>
+                <tr>
+                <th class="text-center header">
+                    Usuario
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Calendario
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Instrumento
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder" ></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Fecha
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Fecha Fin
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                    
+                </th>
+                <th class="text-center header">
+                    Oportunidades
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Anonima
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Estado
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                <th class="text-center header">
+                    Acciones
+                    <svg-icon type="mdi" :path="mdiArrowUpDown" class="arrow-icon" size="18" @click="toggleOrder"></svg-icon>
+                </th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Usar filteredCalendarios en lugar de listaCalendarios -->
+                <tr v-for="item in filteredCalendarios" :key="item.ID_CALENDARIO">
+                <td class="py-3">{{ item.USUARIOS }}</td>
+                <td class="py-3">{{ item.ID_CALENDARIO }}</td>
+                <td class="py-3 fw-semibold">{{ item.ID_INST }}</td>
+                <td class="py-3">{{ item.FECHA_INI }}</td>
+                <td class="py-3">{{ item.FECHA_FIN }}</td>
+                <td class="py-3">{{ item.NRO_OPORTUNIDADES }}</td>
+                <td class="py-3">{{ item.ANONIMA }}</td>
+                <td class="py-3">
+                    <span class="p-2" :class="getStatusClass(item.ESTADO)">
+                    <div v-if="item.ESTADO === 'N'">No Vigente</div>
+                    <div v-else-if="item.ESTADO === 'S'">Vigente</div>
+                    </span>
+                </td>
+                <td class="py-3">
+                    <!-- Botón que abre el modal -->
+                    <button
+                    type="button"
+                    class="btn btn-primary"
+                    data-bs-toggle="modal"
+                    data-bs-target="#exampleModal"
+                    @click="abrirModal(item)"
+                    >
+                    Ver Detalles
+                    </button>
+                </td>
+                </tr>
+            </tbody>
+        </table>
+
     </div>
   </div>
 
@@ -151,6 +167,16 @@ const getStatusClass = (status) => {
 
 <style scoped>
 
+    .arrow-icon{
+        color: #007bff;
+        margin-bottom:2px;
+        cursor: pointer;
+    }
+
+    .arrow-icon:hover{
+        scale: 102%;
+    }
+
     .container-tabla{
         background-color: white;
         margin-top: 15vh;
@@ -159,14 +185,29 @@ const getStatusClass = (status) => {
         border-radius: 5px;
     }
 
-    .btn-vigente{
+    .btn-vigente {
         background-color: #0FAEC0;
+        color: white;
     }
 
-    .btn-no-vigente{
+    .btn-vigente.active {
+        background-color: #088b96;
+        border: 2px solid #056b72;
+    }
+
+    .btn-no-vigente {
         background-color: #b72f63;
+        color: white;
     }
 
+    .btn-no-vigente.active {
+        background-color: #a12453;
+        border: 2px solid #8a1c44;
+    }
+
+    .btn {
+        transition: background-color 0.3s, border 0.3s;
+    }
 
 
 
